@@ -6,7 +6,7 @@ const DashBoardLayout=({children}:{children:React.ReactNode})=>{
     return (
         <div className="h-full ">
             {/* {header} */}
-            <header className=" fixed insert-y-0 w-full z-50">
+            <header className=" fixed insert-y-0 w-full z-50 md:pl-56">
                 <Navbar/>
             </header>
 
@@ -15,7 +15,7 @@ const DashBoardLayout=({children}:{children:React.ReactNode})=>{
                 <Sidebar/>
             </div>
 
-            <main>{children}</main>
+            <main className="md:pl-56 pt-20 h-full">{children}</main>
         </div>
     )
 }

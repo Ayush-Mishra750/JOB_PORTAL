@@ -1,4 +1,5 @@
-import { Compass, List } from "lucide-react";
+'use client'
+import { Bookmark, Compass, List, Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import React from "react";
@@ -24,18 +25,23 @@ const adminRoutes = [
 const guestRoutes = [
   {
     icon: List,
-    label: "Jobs",
-    href: "/admin/jobs",
+    label: "Home",
+    href: "/",
   },
   {
-    icon: List,
-    label: "companies",
-    href: "/admin/companies",
+    icon: Search,
+    label: "Search",
+    href: "/search",
   },
   {
     icon: Compass,
-    label: "Analytics",
-    href: "/admin/analytics",
+    label: "Profile",
+    href: "/profile",
+  },
+   {
+    icon: Bookmark,
+    label: "Saved Jobs",
+    href: "/savedjobs",
   },
   
 ];
@@ -43,12 +49,13 @@ const guestRoutes = [
 const SidebarRoute = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminPage = pathname?.startsWith("/admin");
+  console.log(isAdminPage)
   const routes = isAdminPage ? adminRoutes : guestRoutes;
   return (
     <div className="flex flex-col w-full">
       {routes.map((route) => (
-        <SidebarRouteItem key={route.href} />
+        <SidebarRouteItem key={route.href} icon={route.icon} label={route.label} href={route.href} />
       ))}
     </div>
   );
