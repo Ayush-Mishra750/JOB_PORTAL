@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,40 +17,45 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { CreateJobTitle } from "@/actions/job";
 
+//  Validation Schema
 const formSchema = z.object({
-  jobTitle: z
+  title: z
     .string()
-    .min(2, {message:"At least 2 characters required"})
-    .max(50, "Max 50 characters allowed"),
+    .min(2, { message: "At least 2 characters required" })
+    .max(50, { message: "Max 50 characters allowed" })
+    .refine((val) => !/^\d+$/.test(val), {
+      message: "Job title cannot be only numbers",
+    }),
 });
 
 const CreateJob = () => {
+  
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      jobTitle: "",
+      title: "title",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      setIsLoading(true);
-      console.log("Form submitted ✅", values);
-
-      // ⏳ API call ya DB save ka logic yahan aayega
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      // ✅ Job save hone ke baad navigate karo
-      router.push("/admin/jobs");
-    } catch (error) {
-      console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    startTransition(async () => {
+      try {
+        const job = await CreateJobTitle(values);
+        console.log(job)
+        toast.success("Job created successfully");
+        router.push(`/admin/jobs/${job.id}`);
+      } catch (error) {
+        console.error("Server Error:", error);
+        toast.error("Something went wrong");
+      }
+    });
   };
 
   return (
@@ -69,7 +74,7 @@ const CreateJob = () => {
             {/* Job Title Field */}
             <FormField
               control={form.control}
-              name="jobTitle"
+              name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Job Title</FormLabel>
@@ -79,11 +84,10 @@ const CreateJob = () => {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage/>
+                  <FormMessage />
                   <FormDescription>
                     This will be your job’s public name.
                   </FormDescription>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -93,14 +97,14 @@ const CreateJob = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/admin/jobs")}
               >
                 Cancel
               </Button>
 
               <Button
                 type="submit"
-                disabled={isLoading || !form.watch("jobTitle")}
+                disabled={isLoading || !form.watch("title")}
               >
                 {isLoading ? "Submitting..." : "Continue"}
               </Button>
